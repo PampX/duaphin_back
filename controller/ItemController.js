@@ -3,18 +3,19 @@ const connexion = require('../connexionBD.js');
 
 
 function getAllItems(req,res) {
-    /*return new Item({
-        id : "AAA",
-        name : "Poussin",
-        description : "Petit poussin",
-        rarity : Item.rarities.EPIC,
-        path: "./data/item/pousin_AAA.png"
-    })
-    */
     return connexion.bd_getAllItems(req,res);
 }
 
+function addItem(newItem,req,res){
+    connexion.bd_addItem(newItem,req,res)
+}
+
+function deleteItem(idItem,req,res){
+    connexion.bd_deleteItem(idItem,req,res)
+}
 
 module.exports = {
-    getAllItems: getAllItems
+    getAllItems: getAllItems,
+    addItem: addItem,
+    deleteItem:deleteItem
 };
