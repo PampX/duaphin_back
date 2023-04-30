@@ -15,6 +15,9 @@ connection.connect((err) => {
     console.log('Connected to database!');
 });
 
+/**
+ * Item
+ */
 function bd_getAllItems(callback) {
     const query = 'SELECT * FROM items';
 
@@ -73,11 +76,30 @@ function bd_updateItem(updateItem, idItem, callback) {
     });
 }
 
+/**
+ * User
+ */
+function bd_getAllUsers(callback) {
+    const query = 'SELECT id,name FROM users';
+
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        callback(null, results);
+    });
+}
+
 
 
 module.exports = {
+    // Items
     bd_getAllItems: bd_getAllItems,
     bd_addItem: bd_addItem,
     bd_deleteItem: bd_deleteItem,
-    bd_updateItem: bd_updateItem
+    bd_updateItem: bd_updateItem,
+    // Users
+    bd_getAllUsers: bd_getAllUsers
 };

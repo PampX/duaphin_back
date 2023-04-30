@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const ItemController = require('./controller/ItemController.js');
+const UserController = require('./controller/UserController.js')
 
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
@@ -55,7 +56,16 @@ app.patch('/updateItem/:idItem',(req,res) => {
     });
 })
 
-
+app.get('/users', (req, res) => {
+    UserController.getAllUsers((err, users) => {
+        if (err) {
+            console.error('Error fetching users:', err);
+            res.status(500).send('Error fetching users from database.');
+            return;
+        }
+        res.send(users);
+    });
+});
 
 
 
