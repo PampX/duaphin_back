@@ -43,7 +43,6 @@ function bd_addItem(newItem, callback) {
 
 function bd_deleteItem(idItem, callback) {
     const query = 'DELETE FROM items WHERE id = ?';
-
     connection.query(query, idItem, (err, result) => {
         if (err) {
             console.error('Error executing query:', err);
@@ -58,10 +57,27 @@ function bd_deleteItem(idItem, callback) {
     });
 }
 
+function bd_updateItem(updateItem, idItem, callback) {
+    const query = 'UPDATE items SET ? WHERE id = ?';
+    connection.query(query, [updateItem, idItem], (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        if (result.affectedRows === 0) {
+            callback('Item not found', null);
+            return;
+        }
+        callback(null, `Item with ID ${idItem} updated successfully`);
+    });
+}
+
 
 
 module.exports = {
     bd_getAllItems: bd_getAllItems,
     bd_addItem: bd_addItem,
-    bd_deleteItem: bd_deleteItem
+    bd_deleteItem: bd_deleteItem,
+    bd_updateItem: bd_updateItem
 };

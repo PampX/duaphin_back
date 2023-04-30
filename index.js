@@ -42,6 +42,19 @@ app.delete('/deleteItem',(req,res) => {
     });
 })
 
+app.patch('/updateItem/:idItem',(req,res) => {
+    const updateItem = req.body;
+    const idItem = req.params.idItem;
+    ItemController.updateItem(updateItem,idItem,(err,item) => {
+        if (err) {
+            console.error('Error fetching items:', err);
+            res.status(500).send('Error deleting items from database.');
+            return;
+        }
+        res.send(item);
+    });
+})
+
 
 
 
