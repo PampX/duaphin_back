@@ -7,6 +7,9 @@ const UserController = require('./controller/UserController.js')
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
 
+/**
+ * Items
+ */
 app.get('/items', (req, res) => {
     ItemController.getAllItems((err, items) => {
         if (err) {
@@ -56,6 +59,10 @@ app.patch('/updateItem/:idItem',(req,res) => {
     });
 })
 
+
+/**
+ * Users
+ */
 app.get('/users', (req, res) => {
     UserController.getAllUsers((err, users) => {
         if (err) {
@@ -67,7 +74,41 @@ app.get('/users', (req, res) => {
     });
 });
 
+app.post('/addUser', (req,res) => {
+    const newUser = req.body;
+    UserController.addUser(newUser,(err,user) => {
+        if (err) {
+            console.error('Error fetching users:', err);
+            res.status(500).send('Error adding users from database.');
+            return;
+        }
+        res.send(user);
+    });
+});
+app.delete('/deleteUser',(req,res) => {
+    const idUserToDelete = req.body.id;
+    UserController.deleteUser(idUserToDelete,(err,User) => {
+        if (err) {
+            console.error('Error fetching Users:', err);
+            res.status(500).send('Error deleting Users from database.');
+            return;
+        }
+        res.send(User);
+    });
+})
 
+app.patch('/updateUser/:idUser',(req,res) => {
+    const updateUser = req.body;
+    const idUser = req.params.idUser;
+    UserController.updateUser(updateUser,idUser,(err,User) => {
+        if (err) {
+            console.error('Error fetching Users:', err);
+            res.status(500).send('Error deleting Users from database.');
+            return;
+        }
+        res.send(User);
+    });
+})
 
 
 app.listen(8080, () => {

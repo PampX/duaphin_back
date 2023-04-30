@@ -91,15 +91,61 @@ function bd_getAllUsers(callback) {
         callback(null, results);
     });
 }
+function bd_addUser(newUser, callback) {
+    const query = 'INSERT INTO users SET ?';
 
+    connection.query(query, newUser, (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        callback(null, results);
+    });
+}
+
+function bd_deleteUser(idUser, callback) {
+    const query = 'DELETE FROM users WHERE id = ?';
+    connection.query(query, idUser, (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        if (result.affectedRows === 0) {
+            callback('User not found', null);
+            return;
+        }
+        callback(null, `User with ID ${idUser} deleted successfully`);
+    });
+}
+
+function bd_updateUser(updateUser, idUser, callback) {
+    const query = 'UPDATE users SET ? WHERE id = ?';
+    connection.query(query, [updateUser, idUser], (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        if (result.affectedRows === 0) {
+            callback('User not found', null);
+            return;
+        }
+        callback(null, `User with ID ${idUser} updated successfully`);
+    });
+}
 
 
 module.exports = {
     // Items
-    bd_getAllItems: bd_getAllItems,
-    bd_addItem: bd_addItem,
-    bd_deleteItem: bd_deleteItem,
-    bd_updateItem: bd_updateItem,
+    bd_getAllItems:bd_getAllItems,
+    bd_addItem:bd_addItem,
+    bd_deleteItem:bd_deleteItem,
+    bd_updateItem:bd_updateItem,
     // Users
-    bd_getAllUsers: bd_getAllUsers
+    bd_getAllUsers:bd_getAllUsers,
+    bd_addUser:bd_addUser,
+    bd_deleteUser:bd_deleteUser,
+    bd_updateUser:bd_updateUser
 };
