@@ -80,7 +80,7 @@ function bd_updateItem(updateItem, idItem, callback) {
  * User
  */
 function bd_getAllUsers(callback) {
-    const query = 'SELECT id,name FROM users';
+    const query = 'SELECT id,name,stats FROM users';
 
     connection.query(query, (err, results) => {
         if (err) {
