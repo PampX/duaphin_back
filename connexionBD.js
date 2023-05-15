@@ -136,16 +136,63 @@ function bd_updateUser(updateUser, idUser, callback) {
     });
 }
 
+function bd_signUp(username, hashedPassword, callback) {
+    const query = 'SELECT id FROM users where name = ?';
+    connection.query(query, username, (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        if (result.length === 0) {
+            console.log("l'utilisateur " + username + " n'est pas dans la base de donnée.");
+            bd_createNewUser(username, hashedPassword, callback)
+            console.log("l'utilisateur " + username + " a été créé !");
+            return;
+        }
+        else{
+            console.log("Utilisateur est déjà dans la base de donnée.")
+            callback(null, `User already exists please choose another name`);
+        }
+    });
+}
+
+function bd_createNewUser(username, hashedPassword, callback) {
+    // NEW USERS WITH STATS
+    const query = 'INSERT INTO users (name, password,isAdmin) VALUES (?,?,?);';
+    connection.query(query, [username, hashedPassword, 0], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+
+        const idUser = results.insertId;
+
+        // NEW STATS 
+        const querybis = "INSERT INTO stats (id) VALUES (?) "
+        connection.query(querybis, idUser, (err, results) => {
+            if (err) {
+                console.error('Error executing query:', err);
+                callback(err, null);
+                return;
+            }
+            callback(null, results);
+        })
+    });
+}
+
 
 module.exports = {
     // Items
-    bd_getAllItems:bd_getAllItems,
-    bd_addItem:bd_addItem,
-    bd_deleteItem:bd_deleteItem,
-    bd_updateItem:bd_updateItem,
+    bd_getAllItems: bd_getAllItems,
+    bd_addItem: bd_addItem,
+    bd_deleteItem: bd_deleteItem,
+    bd_updateItem: bd_updateItem,
     // Users
-    bd_getAllUsers:bd_getAllUsers,
-    bd_addUser:bd_addUser,
-    bd_deleteUser:bd_deleteUser,
-    bd_updateUser:bd_updateUser
+    bd_getAllUsers: bd_getAllUsers,
+    bd_addUser: bd_addUser,
+    bd_deleteUser: bd_deleteUser,
+    bd_updateUser: bd_updateUser,
+    bd_signUp: bd_signUp,
 };

@@ -16,9 +16,14 @@ function updateUser(updateUser,idUser,req,res) {
     connexion.bd_updateUser(updateUser,idUser,req,res)
 }
 
+function signUp(username,hashedPassword,req,res){
+    connexion.bd_signUp(username, hashedPassword,req,res)
+}
+
 module.exports = {
     getAllUsers: getAllUsers,
     addUser:addUser,
     deleteUser:deleteUser,
-    updateUser:updateUser
+    updateUser:updateUser,
+    signUp:signUp
 }

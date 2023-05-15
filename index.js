@@ -1,8 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const app = express();
 const ItemController = require('./controller/ItemController.js');
 const UserController = require('./controller/UserController.js')
+
 
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
@@ -109,6 +112,20 @@ app.patch('/updateUser/:idUser',(req,res) => {
         res.send(User);
     });
 })
+
+app.post('/signUp',async (req,res) => {
+    const {username, password} = req.body;
+    const hashedPassword = await bcrypt.hash(password,10)
+    UserController.signUp(username,hashedPassword,(err,User) => {
+        if (err) {
+            console.error('Error signUp User:', err);
+            res.status(500).send('Error SignUp User.');
+            return;
+        }
+        res.send(User);
+    });
+})
+
 
 
 app.listen(8080, () => {
