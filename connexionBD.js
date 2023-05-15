@@ -171,12 +171,10 @@ function bd_createNewUser(username, hashedPassword, callback) {
             callback(err, null);
             return;
         }
-
         const idUser = results.insertId;
-
         // NEW STATS 
-        const querybis = "INSERT INTO stats (id) VALUES (?) "
-        connection.query(querybis, idUser, (err, results) => {
+        const querybis = "INSERT INTO stats (id,goldQty,lastChestOpened,signUpDate) VALUES (?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW()) "
+        connection.query(querybis, [idUser,1000], (err, results) => {
             if (err) {
                 console.error('Error executing query:', err);
                 callback(err, null);
