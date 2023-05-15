@@ -1,10 +1,15 @@
-const mysql = require('mysql')
+const mysql = require('mysql');
+const dotenv = require('dotenv')
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+dotenv.config()
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'duaphinbd'
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE
 })
 
 connection.connect((err) => {
@@ -80,7 +85,7 @@ function bd_updateItem(updateItem, idItem, callback) {
  * User
  */
 function bd_getAllUsers(callback) {
-    const query = 'SELECT id,name,stats FROM users';
+    const query = 'SELECT id,username,stats FROM users';
 
     connection.query(query, (err, results) => {
         if (err) {
@@ -137,8 +142,8 @@ function bd_updateUser(updateUser, idUser, callback) {
 }
 
 function bd_signUp(username, hashedPassword, callback) {
-    const query = 'SELECT id FROM users where name = ?';
-    connection.query(query, username, (err, result) => {
+    const query = 'SELECT id FROM users where username = ?';
+    connection.query(query, [username], (err, result) => {
         if (err) {
             console.error('Error executing query:', err);
             callback(err, null);
@@ -152,14 +157,14 @@ function bd_signUp(username, hashedPassword, callback) {
         }
         else{
             console.log("Utilisateur est déjà dans la base de donnée.")
-            callback(null, `User already exists please choose another name`);
+            callback(null, `User already exists please choose another username`);
         }
     });
 }
 
 function bd_createNewUser(username, hashedPassword, callback) {
     // NEW USERS WITH STATS
-    const query = 'INSERT INTO users (name, password,isAdmin) VALUES (?,?,?);';
+    const query = 'INSERT INTO users (username, password,isAdmin) VALUES (?,?,?);';
     connection.query(query, [username, hashedPassword, 0], (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
@@ -182,6 +187,29 @@ function bd_createNewUser(username, hashedPassword, callback) {
     });
 }
 
+function bd_signIn(username,password,callback){
+    const query = 'SELECT password,id FROM users WHERE username = ?'
+    connection.query(query,[username], async (err,result) =>{
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        if (result.length === 0) {
+            callback(null,'Invalid username or password')
+        }
+        else{
+            const isPasswordValid = await bcrypt.compare(password,result[0].password);
+        if(!isPasswordValid){
+            callback(null,'Invalid username or password')
+        }
+        else{
+            const token = jwt.sign({ userId: result[0].id },process.env.SECRET_KEY,{ expiresIn: '1h'})
+            callback(null,{ message:"Authentication succeful", token})
+        }
+        }
+    })
+}
 
 module.exports = {
     // Items
@@ -195,4 +223,6 @@ module.exports = {
     bd_deleteUser: bd_deleteUser,
     bd_updateUser: bd_updateUser,
     bd_signUp: bd_signUp,
+    bd_signIn: bd_signIn,
+
 };

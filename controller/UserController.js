@@ -20,10 +20,15 @@ function signUp(username,hashedPassword,req,res){
     connexion.bd_signUp(username, hashedPassword,req,res)
 }
 
+function signIn(username,Password,req,res){
+    connexion.bd_signIn(username,Password,req,res)
+}
+
 module.exports = {
     getAllUsers: getAllUsers,
     addUser:addUser,
     deleteUser:deleteUser,
     updateUser:updateUser,
-    signUp:signUp
+    signUp:signUp,
+    signIn:signIn,
 }

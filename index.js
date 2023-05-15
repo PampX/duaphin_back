@@ -4,7 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const app = express();
 const ItemController = require('./controller/ItemController.js');
-const UserController = require('./controller/UserController.js')
+const UserController = require('./controller/UserController.js');
+const User = require('./model/User.js');
 
 
 // middleware pour extraire les donnée JSON
@@ -126,7 +127,17 @@ app.post('/signUp',async (req,res) => {
     });
 })
 
-
+app.post('/signIn', async(req,res) =>{
+    const {username, password} = req.body;
+    UserController.signIn(username,password,(err,User) => {
+        if (err) {
+            console.error('Error signIp User:', err);
+            res.status(500).send('Error SignIp User.');
+            return;
+        }
+        res.send(User);
+    })
+})
 
 app.listen(8080, () => {
     console.log("Server started on port 8080");
