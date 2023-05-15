@@ -20,8 +20,12 @@ function signUp(username,hashedPassword,req,res){
     connexion.bd_signUp(username, hashedPassword,req,res)
 }
 
-function signIn(username,Password,req,res){
-    connexion.bd_signIn(username,Password,req,res)
+function signIn(username,Password,session,req,res){
+    connexion.bd_signIn(username,Password,session,req,res)
+}
+
+function openChest(){
+    connexion.bd_openChest()
 }
 
 module.exports = {
@@ -31,4 +35,5 @@ module.exports = {
     updateUser:updateUser,
     signUp:signUp,
     signIn:signIn,
+    openChest:openChest,
 }

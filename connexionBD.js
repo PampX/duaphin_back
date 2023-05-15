@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -185,7 +185,7 @@ function bd_createNewUser(username, hashedPassword, callback) {
     });
 }
 
-function bd_signIn(username,password,callback){
+function bd_signIn(username,password,session,callback){
     const query = 'SELECT password,id FROM users WHERE username = ?'
     connection.query(query,[username], async (err,result) =>{
         if (err) {
@@ -203,6 +203,7 @@ function bd_signIn(username,password,callback){
         }
         else{
             const token = jwt.sign({ userId: result[0].id },process.env.SECRET_KEY,{ expiresIn: '1h'})
+            session.token = token;
             callback(null,{ message:"Authentication succeful", token})
         }
         }

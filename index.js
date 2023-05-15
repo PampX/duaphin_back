@@ -1,7 +1,9 @@
 const express = require('express');
+const session = require('express-session')
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 const app = express();
 const ItemController = require('./controller/ItemController.js');
 const UserController = require('./controller/UserController.js');
@@ -10,6 +12,13 @@ const User = require('./model/User.js');
 
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
+
+// configuration de la session 
+app.use(session({
+    secret: process.env.SECRET_KEY,
+    resave:false,
+    saveUninitialized:false
+}));
 
 /**
  * Items
@@ -129,7 +138,7 @@ app.post('/signUp',async (req,res) => {
 
 app.post('/signIn', async(req,res) =>{
     const {username, password} = req.body;
-    UserController.signIn(username,password,(err,User) => {
+    UserController.signIn(username,password,req.session,(err,User) => {
         if (err) {
             console.error('Error signIp User:', err);
             res.status(500).send('Error SignIp User.');
@@ -138,6 +147,23 @@ app.post('/signIn', async(req,res) =>{
         res.send(User);
     })
 })
+
+app.get('/testToken', async (req, res) => {
+    // Récupérer le token de la session
+    const token = req.session.token;
+
+    // Vérifier la validité du token
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        // Le token est valide
+        console.log('Token is valid:', decoded);
+        res.send('Token is valid');
+    } catch (err) {
+        // Le token est invalide ou a expiré
+        console.error('Token is invalid:', err);
+        res.send('Token is invalid');
+    }
+});
 
 app.listen(8080, () => {
     console.log("Server started on port 8080");
