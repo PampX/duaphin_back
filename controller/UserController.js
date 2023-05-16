@@ -28,6 +28,10 @@ function openChest(id,req,res){
     connexion.bd_openChest(id,req,res)
 }
 
+function buyNormalDeck(id,req,res){
+    connexion.bd_buyNormalDeck(id,req,res)
+}
+
 module.exports = {
     getAllUsers: getAllUsers,
     addUser:addUser,
@@ -36,4 +40,5 @@ module.exports = {
     signUp:signUp,
     signIn:signIn,
     openChest:openChest,
+    buyNormalDeck:buyNormalDeck,
 }

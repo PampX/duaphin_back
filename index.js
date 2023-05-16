@@ -177,6 +177,19 @@ app.patch('/openChest', verifyToken, (req,res)=>{
     })
 })
 
+// verifyToken à mettre
+app.patch('/buyNormalDeck', (req,res)=>{
+    UserController.buyNormalDeck(6,(err,user)=>{
+        if (err) {
+            console.error('Error buyNormalDeck :', err);
+            res.status(500).send('Error buyNormalDeck User.');
+            return;
+        }
+        res.send(user);
+    
+    })
+})
+
 app.listen(8080, () => {
     console.log("Server started on port 8080");
 })
