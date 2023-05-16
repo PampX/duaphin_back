@@ -178,8 +178,8 @@ app.patch('/openChest', verifyToken, (req,res)=>{
 })
 
 // verifyToken à mettre
-app.patch('/buyNormalDeck', (req,res)=>{
-    UserController.buyNormalDeck(6,(err,user)=>{
+app.patch('/buyNormalDeck',verifyToken, (req,res)=>{
+    UserController.buyNormalDeck(req.userId,(err,user)=>{
         if (err) {
             console.error('Error buyNormalDeck :', err);
             res.status(500).send('Error buyNormalDeck User.');

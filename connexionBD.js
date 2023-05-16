@@ -244,32 +244,79 @@ function bd_openChest(id, callback) {
     })
 }
 
-async function bd_buyNormalDeck(id,callback){
-    const rarity = selectRarity()
-    const query = 'SELECT * from items WHERE rarity = ?'
-    connection.query(query, [rarity], async (err, result) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            callback(err, null);
-            return;
-        }
-        if (result.length === 0) {
-            callback(null, 'Items not found');
-            return;
-        }
-        // on a notre liste d'item ayant la valeur de rareté chosi au hasard
-        const rdIndex = Math.floor(Math.random() * result.length)
-        const item = result[rdIndex]
-        let heHasIt = await doesUserAlreadyHaveThisItem(item.id,id,callback)
+async function bd_buyNormalDeck(id, callback) {
+    let doesHeCan = await heCanPay(id)
+    if(doesHeCan) {
+        let item = await chooseRandomItem();
+        let heHasIt = await doesUserAlreadyHaveThisItem(item.id, id);
 
-        if(heHasIt){
-            giveUserSomeGold(item.rarity,id,callback);
+        if (heHasIt) {
+            giveUserSomeGold(item.rarity, id, callback);
         }
-        else{
-            giveUserItem(item.id,id,callback);
+        else {
+            giveUserItem(item.id, id, callback);
         }
+    } else {
+        callback("User can't afford this deck")
+    }
+}
+
+function heCanPay(id){
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT goldQty FROM stats WHERE id = ?';
+        connection.query(query, [id], (err, result) => {
+            if (err) {
+                console.error('Error executing query:', err);
+                reject(err);
+            } else {
+                if (result.length === 0) {
+                    reject("There is a probleme about gold qty");
+
+                } else if(result[0].goldQty > 100){
+                    userPayingGold(id,100)
+                    resolve(true)
+                } 
+                else {
+                    console.log("User can't afford this deck ");
+                    resolve(false);
+                }
+            }
+        });
+    });
+}
+function userPayingGold(id,goldQty){
+    const query = 'UPDATE stats SET goldQty = goldQty - ? WHERE id = ?';
+            connection.query(query, [goldQty,id], async (err, result) => {
+                if (err) {
+                    console.error('Error executing query:', err);
+                    callback(err, null);
+                    return;
+                }
+                console.log('Stats updated user paid');
+            });
+}
+
+function chooseRandomItem() {
+    return new Promise((resolve, reject) => {
+        const rarity = selectRarity()
+        const query = 'SELECT * from items WHERE rarity = ?'
+        connection.query(query, [rarity], async (err, result) => {
+            if (err) {
+                console.error('Error executing query:', err);
+                reject(err)
+                return;
+            }
+            if (result.length === 0) {
+                reject('Items not found');
+                return;
+            }
+            // on a notre liste d'item ayant la valeur de rareté chosi au hasard
+            const rdIndex = Math.floor(Math.random() * result.length)
+            resolve(result[rdIndex])
+        })
     })
 }
+
 
 function doesUserAlreadyHaveThisItem(idItem, idUser) {
     return new Promise((resolve, reject) => {
