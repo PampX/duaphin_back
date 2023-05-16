@@ -13,6 +13,23 @@ const User = require('./model/User.js');
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
 
+// midlleware vérification du token 
+function verifyToken(req,res,next) {
+    // Récupérer le token de la session
+    const token = req.session.token;
+
+    // Vérifier la validité du token
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        // Le token est valide
+        req.userId = decoded.userId;
+        next();
+    } catch (err) {
+        // Le token est invalide ou a expiré
+        res.status(401).send('Token is invalid')
+    }
+}
+
 // configuration de la session 
 app.use(session({
     secret: process.env.SECRET_KEY,
@@ -148,22 +165,17 @@ app.post('/signIn', async(req,res) =>{
     })
 })
 
-app.get('/testToken', async (req, res) => {
-    // Récupérer le token de la session
-    const token = req.session.token;
-
-    // Vérifier la validité du token
-    try {
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        // Le token est valide
-        console.log('Token is valid:', decoded);
-        res.send('Token is valid');
-    } catch (err) {
-        // Le token est invalide ou a expiré
-        console.error('Token is invalid:', err);
-        res.send('Token is invalid');
-    }
-});
+app.patch('/openChest', verifyToken, (req,res)=>{
+    
+    UserController.openChest(req.userId,(err,User) => {
+        if (err) {
+            console.error('Error openChest :', err);
+            res.status(500).send('Error openChest User.');
+            return;
+        }
+        res.send(User);
+    })
+})
 
 app.listen(8080, () => {
     console.log("Server started on port 8080");

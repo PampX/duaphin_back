@@ -155,7 +155,7 @@ function bd_signUp(username, hashedPassword, callback) {
             console.log("l'utilisateur " + username + " a été créé !");
             return;
         }
-        else{
+        else {
             console.log("Utilisateur est déjà dans la base de donnée.")
             callback(null, `User already exists please choose another username`);
         }
@@ -174,7 +174,7 @@ function bd_createNewUser(username, hashedPassword, callback) {
         const idUser = results.insertId;
         // NEW STATS 
         const querybis = "INSERT INTO stats (id,goldQty,lastChestOpened,signUpDate) VALUES (?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW()) "
-        connection.query(querybis, [idUser,1000], (err, results) => {
+        connection.query(querybis, [idUser, 1000], (err, results) => {
             if (err) {
                 console.error('Error executing query:', err);
                 callback(err, null);
@@ -185,27 +185,61 @@ function bd_createNewUser(username, hashedPassword, callback) {
     });
 }
 
-function bd_signIn(username,password,session,callback){
+function bd_signIn(username, password, session, callback) {
     const query = 'SELECT password,id FROM users WHERE username = ?'
-    connection.query(query,[username], async (err,result) =>{
+    connection.query(query, [username], async (err, result) => {
         if (err) {
             console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
         if (result.length === 0) {
-            callback(null,'Invalid username or password')
+            callback(null, 'Invalid username or password')
         }
-        else{
-            const isPasswordValid = await bcrypt.compare(password,result[0].password);
-        if(!isPasswordValid){
-            callback(null,'Invalid username or password')
+        else {
+            const isPasswordValid = await bcrypt.compare(password, result[0].password);
+            if (!isPasswordValid) {
+                callback(null, 'Invalid username or password')
+            }
+            else {
+                const token = jwt.sign({ userId: result[0].id }, process.env.SECRET_KEY, { expiresIn: '1h' })
+                session.token = token;
+                callback(null, { message: "Authentication succeful", token })
+            }
         }
-        else{
-            const token = jwt.sign({ userId: result[0].id },process.env.SECRET_KEY,{ expiresIn: '1h'})
-            session.token = token;
-            callback(null,{ message:"Authentication succeful", token})
+    })
+}
+
+function bd_openChest(id, callback) {
+    const query = 'SELECT lastChestOpened from stats WHERE id = ?'
+    connection.query(query, [id], async (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
         }
+        if (result.length === 0) {
+            callback(null, 'Stats not found');
+            return;
+        }
+        // Vérifier si la date est supérieure à now + 1 minute
+        const now = new Date();
+        const dateMin = new Date(now.getTime() - 1 * 60 * 1000);
+        if (result[0].lastChestOpened < dateMin) {
+            // La date est supérieure à now + 1 minute, ajouter 10 à la valeur d'or
+            const query = 'UPDATE stats SET goldQty = goldQty + 10, lastChestOpened = NOW() WHERE id = ?';
+            connection.query(query, [id], async (err, result) => {
+                if (err) {
+                    console.error('Error executing query:', err);
+                    callback(err, null);
+                    return;
+                }
+                callback(null, 'Stats updated');
+            });
+        }
+        else {
+            // La date est inférieure ou égale à now + 1 minute, ne rien faire
+            callback(null, 'Stats not updated');
         }
     })
 }
@@ -223,5 +257,6 @@ module.exports = {
     bd_updateUser: bd_updateUser,
     bd_signUp: bd_signUp,
     bd_signIn: bd_signIn,
+    bd_openChest: bd_openChest,
 
 };

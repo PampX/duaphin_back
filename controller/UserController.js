@@ -24,8 +24,8 @@ function signIn(username,Password,session,req,res){
     connexion.bd_signIn(username,Password,session,req,res)
 }
 
-function openChest(){
-    connexion.bd_openChest()
+function openChest(id,req,res){
+    connexion.bd_openChest(id,req,res)
 }
 
 module.exports = {
