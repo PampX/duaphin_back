@@ -9,6 +9,9 @@ const ItemController = require('./controller/ItemController.js');
 const UserController = require('./controller/UserController.js');
 const User = require('./model/User.js');
 
+//test cors
+const cors = require('cors')
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
