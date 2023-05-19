@@ -32,6 +32,10 @@ function buyNormalDeck(id,req,res){
     connexion.bd_buyNormalDeck(id,req,res)
 }
 
+function getUserStats(id,req,res){
+    connexion.bd_getUserStats(id,req,res)
+}
+
 module.exports = {
     getAllUsers: getAllUsers,
     addUser:addUser,
@@ -41,4 +45,5 @@ module.exports = {
     signIn:signIn,
     openChest:openChest,
     buyNormalDeck:buyNormalDeck,
+    getUserStats:getUserStats,
 }

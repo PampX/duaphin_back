@@ -219,7 +219,7 @@ function bd_openChest(id, callback) {
             return;
         }
         if (result.length === 0) {
-            callback(null, 'Stats not found');
+            callback(null, {message:'Stats not found'});
             return;
         }
         // Vérifier si la date est supérieure à now + 1 minute
@@ -234,7 +234,7 @@ function bd_openChest(id, callback) {
                     callback(err, null);
                     return;
                 }
-                callback(null, 'Stats updated');
+                callback(null, {message:'Stats updated'});
             });
         }
         else {
@@ -392,6 +392,21 @@ function selectRarity() {
 function sumArray(array) {
     return array.reduce((acc, current) => acc + current, 0);
 }
+
+function bd_getUserStats(idUser,callback){
+    console.log("stats of user with id : "+idUser)
+    const query = 'SELECT goldQty,signUpDate,lastChestOpened FROM stats WHERE id = ?';
+
+    connection.query(query,[idUser], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        callback(null, results[0]);
+    });
+}
+
 module.exports = {
     // Items
     bd_getAllItems: bd_getAllItems,
@@ -407,5 +422,6 @@ module.exports = {
     bd_signIn: bd_signIn,
     bd_openChest: bd_openChest,
     bd_buyNormalDeck:bd_buyNormalDeck,
+    bd_getUserStats:bd_getUserStats,
 
 };

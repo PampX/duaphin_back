@@ -143,6 +143,23 @@ app.patch('/updateUser/:idUser',(req,res) => {
     });
 })
 
+app.get('/stats/:token',(req, res) => {
+    const token = req.params.token
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    console.log(decoded);
+    const id = decoded.userId;
+    console.log(id);
+    UserController.getUserStats(id,(err, users) => {
+        if (err) {
+            console.error('Error get stats of users:', err);
+            res.status(500).send('Error get stats of users: '+err);
+            return;
+        }
+        console.log(users);
+        res.send(users);
+    });
+});
+
 app.post('/signUp',async (req,res) => {
     const {username, password} = req.body;
     const hashedPassword = await bcrypt.hash(password,10)
@@ -168,9 +185,13 @@ app.post('/signIn', async(req,res) =>{
     })
 })
 
-app.patch('/openChest', verifyToken, (req,res)=>{
+app.patch('/openChest', (req,res)=>{
+    const token = req.body.token
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    console.log(decoded);
+    const id = decoded.userId
     
-    UserController.openChest(req.userId,(err,User) => {
+    UserController.openChest(id,(err,User) => {
         if (err) {
             console.error('Error openChest :', err);
             res.status(500).send('Error openChest User.');
