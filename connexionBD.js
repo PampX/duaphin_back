@@ -153,11 +153,12 @@ function bd_signUp(username, hashedPassword, callback) {
             console.log("l'utilisateur " + username + " n'est pas dans la base de donnée.");
             bd_createNewUser(username, hashedPassword, callback)
             console.log("l'utilisateur " + username + " a été créé !");
+            callback(null, {message: 'Account created successfully!'})
             return;
         }
         else {
             console.log("Utilisateur est déjà dans la base de donnée.")
-            callback(null, `User already exists please choose another username`);
+            callback(null, {message:'This username already exists. Please choose another username.'});
         }
     });
 }
