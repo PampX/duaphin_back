@@ -194,17 +194,17 @@ function bd_signIn(username, password, session, callback) {
             return;
         }
         if (result.length === 0) {
-            callback(null, 'Invalid username or password')
+            callback(null, { message:'Invalid username or password'})
         }
         else {
             const isPasswordValid = await bcrypt.compare(password, result[0].password);
             if (!isPasswordValid) {
-                callback(null, 'Invalid username or password')
+                callback(null, { message:'Invalid username or password'})
             }
             else {
-                const token = jwt.sign({ userId: result[0].id }, process.env.SECRET_KEY, { expiresIn: '1h' })
+                const token = jwt.sign({ userId: result[0].id, isAdmin: result[0].isAdmin }, process.env.SECRET_KEY, { expiresIn: '1h' })
                 session.token = token;
-                callback(null, { message: "Authentication succeful", token })
+                callback(null, { message: "Authentication successful", token })
             }
         }
     })
