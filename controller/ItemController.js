@@ -1,21 +1,21 @@
 const Item = require('../model/Item.js')
-const connexion = require('../connexionBD.js');
+const itemQueries = require('../database/mysql/itemQueries.js');
 
 
 function getAllItems(req,res){
-    return connexion.bd_getAllItems(req,res);
+    return itemQueries.bd_getAllItems(req,res);
 }
 
 function addItem(newItem,req,res){
-    connexion.bd_addItem(newItem,req,res)
+    itemQueries.bd_addItem(newItem,req,res)
 }
 
 function deleteItem(idItem,req,res){
-    connexion.bd_deleteItem(idItem,req,res)
+    itemQueries.bd_deleteItem(idItem,req,res)
 }
 
 function updateItem(updateItem,idItem,req,res) {
-    connexion.bd_updateItem(updateItem,idItem,req,res)
+    itemQueries.bd_updateItem(updateItem,idItem,req,res)
 }
 
 module.exports = {
