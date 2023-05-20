@@ -2,8 +2,8 @@ const Item = require('../model/Item.js')
 const itemQueries = require('../database/mysql/itemQueries.js');
 
 
-function getAllItems(req,res){
-    return itemQueries.bd_getAllItems(req,res);
+function getAllItems(res){
+    return itemQueries.bd_getAllItems(res);
 }
 
 function addItem(newItem,req,res){

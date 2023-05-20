@@ -7,9 +7,9 @@ const dotenv = require('dotenv');
 const app = express();
 const ItemController = require('./controller/ItemController.js');
 const UserController = require('./controller/UserController.js');
-const User = require('./model/User.js');
 
-//test cors
+dotenv.config()
+
 const cors = require('cors')
 app.use(cors({ origin: 'http://localhost:3000' }));
 
@@ -44,14 +44,7 @@ app.use(session({
  * Items
  */
 app.get('/items', (req, res) => {
-    ItemController.getAllItems((err, items) => {
-        if (err) {
-            console.error('Error fetching items:', err);
-            res.status(500).send('Error fetching items from database.');
-            return;
-        }
-        res.send(items);
-    });
+    res.send(ItemController.getAllItems(req))
 });
 
 

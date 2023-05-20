@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {connection} = require('./connexionDB.js');
+const { connection } = require('./connexionDB.js');
 
 function bd_getAllUsers(callback) {
     const query = 'SELECT id,username,stats FROM users';
@@ -71,12 +71,12 @@ function bd_signUp(username, hashedPassword, callback) {
             console.log("l'utilisateur " + username + " n'est pas dans la base de donnée.");
             bd_createNewUser(username, hashedPassword, callback)
             console.log("l'utilisateur " + username + " a été créé !");
-            callback(null, {message: 'Account created successfully! You can now Sign In.'})
+            callback(null, { message: 'Account created successfully! You can now Sign In.' })
             return;
         }
         else {
             console.log("Utilisateur est déjà dans la base de donnée.")
-            callback(null, {message:'This username already exists. Please choose another username.'});
+            callback(null, { message: 'This username already exists. Please choose another username.' });
         }
     });
 }
@@ -116,12 +116,12 @@ function bd_signIn(username, password, session, callback) {
         console.log(result.length === 0);
 
         if (result.length === 0) {
-            callback(null, { message:'Invalid username or password'})
+            callback(null, { message: 'Invalid username or password' })
         }
         else {
             const isPasswordValid = await bcrypt.compare(password, result[0].password);
             if (!isPasswordValid) {
-                callback(null, { message:'Invalid username or password'})
+                callback(null, { message: 'Invalid username or password' })
             }
             else {
                 const token = jwt.sign({ userId: result[0].id, isAdmin: result[0].isAdmin }, process.env.SECRET_KEY, { expiresIn: '1h' })
@@ -141,34 +141,36 @@ function bd_openChest(id, callback) {
             return;
         }
         if (result.length === 0) {
-            callback(null, {message:'Stats not found'});
+            callback(null, { message: 'Stats not found' });
             return;
         }
         // Vérifier si la date est supérieure à now + 1 minute
         const now = new Date();
-        const dateMin = new Date(now.getTime() - 1 * 60 * 1000);
+        const dateMin = new Date(now.getTime() + 1 * 60 * 1000);
         if (result[0].lastChestOpened < dateMin) {
-            // La date est supérieure à now + 1 minute, ajouter 10 à la valeur d'or
-            const query = 'UPDATE stats SET goldQty = goldQty + 10, lastChestOpened = NOW() WHERE id = ?';
-            connection.query(query, [id], async (err, result) => {
+            const now = new Date();
+            const oneMinuteLater = new Date(now.getTime() + 60000); // Ajouter 1 minute
+
+            const query = 'UPDATE stats SET goldQty = goldQty + 10, lastChestOpened = ? WHERE id = ?';
+            connection.query(query, [oneMinuteLater, id], async (err, result) => {
                 if (err) {
                     console.error('Error executing query:', err);
                     callback(err, null);
                     return;
                 }
-                callback(null, {message:'Stats updated'});
+                callback(null, { message: 'Stats updated' });
             });
         }
         else {
             // La date est inférieure ou égale à now + 1 minute, ne rien faire
-            callback(null, 'Stats not updated');
+            callback(null, { message: 'Stats not updated,you have to wait.'});
         }
     })
 }
 
 async function bd_buyNormalDeck(id, callback) {
     let doesHeCan = await heCanPay(id)
-    if(doesHeCan) {
+    if (doesHeCan) {
         let item = await chooseRandomItem();
         let heHasIt = await doesUserAlreadyHaveThisItem(item.id, id);
 
@@ -183,7 +185,7 @@ async function bd_buyNormalDeck(id, callback) {
     }
 }
 
-function heCanPay(id){
+function heCanPay(id) {
     return new Promise((resolve, reject) => {
         const query = 'SELECT goldQty FROM stats WHERE id = ?';
         connection.query(query, [id], (err, result) => {
@@ -194,10 +196,10 @@ function heCanPay(id){
                 if (result.length === 0) {
                     reject("There is a probleme about gold qty");
 
-                } else if(result[0].goldQty > 100){
-                    userPayingGold(id,100)
+                } else if (result[0].goldQty > 100) {
+                    userPayingGold(id, 100)
                     resolve(true)
-                } 
+                }
                 else {
                     console.log("User can't afford this deck ");
                     resolve(false);
@@ -206,16 +208,16 @@ function heCanPay(id){
         });
     });
 }
-function userPayingGold(id,goldQty){
+function userPayingGold(id, goldQty) {
     const query = 'UPDATE stats SET goldQty = goldQty - ? WHERE id = ?';
-            connection.query(query, [goldQty,id], async (err, result) => {
-                if (err) {
-                    console.error('Error executing query:', err);
-                    callback(err, null);
-                    return;
-                }
-                console.log('Stats updated user paid');
-            });
+    connection.query(query, [goldQty, id], async (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        console.log('Stats updated user paid');
+    });
 }
 
 function chooseRandomItem() {
@@ -260,7 +262,7 @@ function doesUserAlreadyHaveThisItem(idItem, idUser) {
     });
 }
 
-function giveUserSomeGold(rarity,id,callback){
+function giveUserSomeGold(rarity, id, callback) {
     const worthRarityInGold = {
         common: 10,
         uncommon: 15,
@@ -269,20 +271,20 @@ function giveUserSomeGold(rarity,id,callback){
         legendary: 50,
     }
     const query = 'UPDATE stats SET goldQty = goldQty + ? WHERE id = ?';
-            connection.query(query, [worthRarityInGold[rarity],id], async (err, result) => {
-                if (err) {
-                    console.error('Error executing query:', err);
-                    callback(err, null);
-                    return;
-                }
-                callback(null, 'Stats updated +gold already item');
-            });
+    connection.query(query, [worthRarityInGold[rarity], id], async (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        callback(null, 'Stats updated +gold already item');
+    });
 }
 
-function giveUserItem(idItem,idUser,callback){
+function giveUserItem(idItem, idUser, callback) {
     const query = 'INSERT INTO collection (id_item,id_user) VALUES (?,?)';
 
-    connection.query(query, [idItem,idUser], (err, results) => {
+    connection.query(query, [idItem, idUser], (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
             callback(err, null);
@@ -294,9 +296,9 @@ function giveUserItem(idItem,idUser,callback){
 
 
 function selectRarity() {
-    const rarity = ["common","uncommon","rare","epic","legendary"]
+    const rarity = ["common", "uncommon", "rare", "epic", "legendary"]
     //const rarityWeights = [52,26,13,6,3]
-    const rarityWeights = [52,26,13,6,1]
+    const rarityWeights = [52, 26, 13, 6, 1]
     // const rarityWeightsluxe = [0,0,50,30,20]
 
     let rd = 0
@@ -315,11 +317,11 @@ function sumArray(array) {
     return array.reduce((acc, current) => acc + current, 0);
 }
 
-function bd_getUserStats(idUser,callback){
-    console.log("stats of user with id : "+idUser)
+function bd_getUserStats(idUser, callback) {
+    console.log("stats of user with id : " + idUser)
     const query = 'SELECT goldQty,signUpDate,lastChestOpened FROM stats WHERE id = ?';
 
-    connection.query(query,[idUser], (err, results) => {
+    connection.query(query, [idUser], (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
             callback(err, null);
@@ -338,7 +340,7 @@ module.exports = {
     bd_signUp: bd_signUp,
     bd_signIn: bd_signIn,
     bd_openChest: bd_openChest,
-    bd_buyNormalDeck:bd_buyNormalDeck,
-    bd_getUserStats:bd_getUserStats,
+    bd_buyNormalDeck: bd_buyNormalDeck,
+    bd_getUserStats: bd_getUserStats,
 
 };

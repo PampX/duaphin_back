@@ -19,7 +19,7 @@ function bd_addItem(newItem, callback) {
     connection.query(query, newItem, (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
-            callback(err, null);
+            callback(err, {message: err.message});
             return;
         }
         callback(null, results);
