@@ -12,6 +12,18 @@ function bd_getAllItems(callback) {
         callback(null, results);
     });
 }
+function bd_getAllItemsForUser(id,callback) {
+    const query = 'SELECT items.* FROM `items` JOIN collection ON id = id_item WHERE id_user = ?;';
+
+    connection.query(query, [id] ,(err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            callback(err, null);
+            return;
+        }
+        callback(null, results);
+    });
+}
 
 function bd_addItem(newItem, callback) {
     const query = 'INSERT INTO items SET ?';
@@ -60,6 +72,7 @@ function bd_updateItem(updateItem, idItem, callback) {
 
 module.exports = {
     bd_getAllItems: bd_getAllItems,
+    bd_getAllItemsForUser:bd_getAllItemsForUser,
     bd_addItem: bd_addItem,
     bd_deleteItem: bd_deleteItem,
     bd_updateItem: bd_updateItem,

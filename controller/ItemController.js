@@ -2,8 +2,12 @@ const Item = require('../model/Item.js')
 const itemQueries = require('../database/mysql/itemQueries.js');
 
 
-function getAllItems(res){
-    return itemQueries.bd_getAllItems(res);
+function getAllItems(req,res){
+    return itemQueries.bd_getAllItems(req,res);
+} 
+
+function getAllItemsForUser(id,req,res){
+    return itemQueries.bd_getAllItemsForUser(id,req,res);
 }
 
 function addItem(newItem,req,res){
@@ -20,6 +24,7 @@ function updateItem(updateItem,idItem,req,res) {
 
 module.exports = {
     getAllItems: getAllItems,
+    getAllItemsForUser:getAllItemsForUser,
     addItem: addItem,
     deleteItem:deleteItem,
     updateItem:updateItem

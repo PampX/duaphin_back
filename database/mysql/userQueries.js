@@ -146,8 +146,7 @@ function bd_openChest(id, callback) {
         }
         // Vérifier si la date est supérieure à now + 1 minute
         const now = new Date();
-        const dateMin = new Date(now.getTime() + 1 * 60 * 1000);
-        if (result[0].lastChestOpened > dateMin) {
+        if (result[0].lastChestOpened < now) {
             const now = new Date();
             const oneMinuteLater = new Date(now.getTime() + 60000); // Ajouter 1 minute
 

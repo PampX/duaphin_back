@@ -44,9 +44,32 @@ app.use(session({
  * Items
  */
 app.get('/items', (req, res) => {
-    res.send(ItemController.getAllItems(req))
+    ItemController.getAllItems((err, users) => {
+        if (err) {
+            console.error('Error fetching items:', err);
+            res.status(500).send('Error fetching items from database.');
+            return;
+        }
+        res.send(users);
+    });
 });
 
+app.get('/itemsOfUser/:token', (req, res) => {
+    // à mettre dans une fonction 
+    const token = req.params.token
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    console.log(decoded);
+    const id = decoded.userId;
+    console.log(id);
+    ItemController.getAllItemsForUser(id,(err, users) => {
+        if (err) {
+            console.error('Error fetching items:', err);
+            res.status(500).send('Error fetching items from database.');
+            return;
+        }
+        res.send(users);
+    });
+});
 
 app.post('/addItem', (req,res) => {
     const newItem = req.body;
