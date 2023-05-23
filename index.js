@@ -46,7 +46,7 @@ app.use(session({
 app.get('/items', (req, res) => {
     ItemController.getAllItems((err, users) => {
         if (err) {
-            console.error('Error fetching items:', err);
+            //console.error('Error fetching items:', err);
             res.status(500).send('Error fetching items from database.');
             return;
         }
@@ -58,12 +58,12 @@ app.get('/itemsOfUser/:token', (req, res) => {
     // à mettre dans une fonction 
     const token = req.params.token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(decoded);
+    //console.log(decoded);
     const id = decoded.userId;
-    console.log(id);
+    //console.log(id);
     ItemController.getAllItemsForUser(id,(err, users) => {
         if (err) {
-            console.error('Error fetching items:', err);
+            //console.error('Error fetching items:', err);
             res.status(500).send('Error fetching items from database.');
             return;
         }
@@ -75,7 +75,7 @@ app.post('/addItem', (req,res) => {
     const newItem = req.body;
     ItemController.addItem(newItem,(err,item) => {
         if (err) {
-            console.error('Error fetching items:', err);
+            //console.error('Error fetching items:', err);
             res.status(500).send('Error adding items from database.');
             return;
         }
@@ -87,7 +87,7 @@ app.delete('/deleteItem',(req,res) => {
     const idItemToDelete = req.body.id;
     ItemController.deleteItem(idItemToDelete,(err,item) => {
         if (err) {
-            console.error('Error fetching items:', err);
+            //console.error('Error fetching items:', err);
             res.status(500).send('Error deleting items from database.');
             return;
         }
@@ -100,7 +100,7 @@ app.patch('/updateItem/:idItem',(req,res) => {
     const idItem = req.params.idItem;
     ItemController.updateItem(updateItem,idItem,(err,item) => {
         if (err) {
-            console.error('Error fetching items:', err);
+            //console.error('Error fetching items:', err);
             res.status(500).send('Error deleting items from database.');
             return;
         }
@@ -115,7 +115,7 @@ app.patch('/updateItem/:idItem',(req,res) => {
 app.get('/users', (req, res) => {
     UserController.getAllUsers((err, users) => {
         if (err) {
-            console.error('Error fetching users:', err);
+            //console.error('Error fetching users:', err);
             res.status(500).send('Error fetching users from database.');
             return;
         }
@@ -127,7 +127,7 @@ app.post('/addUser', (req,res) => {
     const newUser = req.body;
     UserController.addUser(newUser,(err,user) => {
         if (err) {
-            console.error('Error fetching users:', err);
+            //console.error('Error fetching users:', err);
             res.status(500).send('Error adding users from database.');
             return;
         }
@@ -138,7 +138,7 @@ app.delete('/deleteUser',(req,res) => {
     const idUserToDelete = req.body.id;
     UserController.deleteUser(idUserToDelete,(err,User) => {
         if (err) {
-            console.error('Error fetching Users:', err);
+            //console.error('Error fetching Users:', err);
             res.status(500).send('Error deleting Users from database.');
             return;
         }
@@ -151,7 +151,7 @@ app.patch('/updateUser/:idUser',(req,res) => {
     const idUser = req.params.idUser;
     UserController.updateUser(updateUser,idUser,(err,User) => {
         if (err) {
-            console.error('Error fetching Users:', err);
+            //console.error('Error fetching Users:', err);
             res.status(500).send('Error deleting Users from database.');
             return;
         }
@@ -162,16 +162,16 @@ app.patch('/updateUser/:idUser',(req,res) => {
 app.get('/stats/:token',(req, res) => {
     const token = req.params.token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(decoded);
+    //console.log(decoded);
     const id = decoded.userId;
-    console.log(id);
+    //console.log(id);
     UserController.getUserStats(id,(err, users) => {
         if (err) {
-            console.error('Error get stats of users:', err);
+            //console.error('Error get stats of users:', err);
             res.status(500).send('Error get stats of users: '+err);
             return;
         }
-        console.log(users);
+        //console.log(users);
         res.send(users);
     });
 });
@@ -181,7 +181,7 @@ app.post('/signUp',async (req,res) => {
     const hashedPassword = await bcrypt.hash(password,10)
     UserController.signUp(username,hashedPassword,(err,User) => {
         if (err) {
-            console.error('Error signUp User:', err);
+            //console.error('Error signUp User:', err);
             res.status(500).send('Error SignUp User.');
             return;
         }
@@ -193,7 +193,7 @@ app.post('/signIn', async(req,res) =>{
     const {username, password} = req.body;
     UserController.signIn(username,password,req.session,(err,User) => {
         if (err) {
-            console.error('Error signIp User:', err);
+            //console.error('Error signIp User:', err);
             res.status(500).send('Error SignIp User.');
             return;
         }
@@ -204,12 +204,12 @@ app.post('/signIn', async(req,res) =>{
 app.patch('/openChest', (req,res)=>{
     const token = req.body.token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(decoded);
+    //console.log(decoded);
     const id = decoded.userId
     
     UserController.openChest(id,(err,User) => {
         if (err) {
-            console.error('Error openChest :', err);
+            //console.error('Error openChest :', err);
             res.status(500).send('Error openChest User.');
             return;
         }
@@ -218,10 +218,14 @@ app.patch('/openChest', (req,res)=>{
 })
 
 // verifyToken à mettre
-app.patch('/buyNormalDeck',verifyToken, (req,res)=>{
-    UserController.buyNormalDeck(req.userId,(err,user)=>{
+app.patch('/buyNormalDeck', (req,res)=>{
+    const token = req.body.token
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    //console.log(decoded);
+    const id = decoded.userId
+    UserController.buyNormalDeck(id,(err,user)=>{
         if (err) {
-            console.error('Error buyNormalDeck :', err);
+            //console.error('Error buyNormalDeck :', err);
             res.status(500).send('Error buyNormalDeck User.');
             return;
         }
@@ -231,5 +235,5 @@ app.patch('/buyNormalDeck',verifyToken, (req,res)=>{
 })
 
 app.listen(8080, () => {
-    console.log("Server started on port 8080");
+    //console.log("Server started on port 8080");
 })

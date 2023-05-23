@@ -7,7 +7,7 @@ function bd_getAllUsers(callback) {
 
     connection.query(query, (err, results) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -19,7 +19,7 @@ function bd_addUser(newUser, callback) {
 
     connection.query(query, newUser, (err, results) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -31,7 +31,7 @@ function bd_deleteUser(idUser, callback) {
     const query = 'DELETE FROM users WHERE id = ?';
     connection.query(query, idUser, (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -47,7 +47,7 @@ function bd_updateUser(updateUser, idUser, callback) {
     const query = 'UPDATE users SET ? WHERE id = ?';
     connection.query(query, [updateUser, idUser], (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -63,19 +63,19 @@ function bd_signUp(username, hashedPassword, callback) {
     const query = 'SELECT id FROM users where username = ?';
     connection.query(query, [username], (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
         if (result.length === 0) {
-            console.log("l'utilisateur " + username + " n'est pas dans la base de donnée.");
+            ////console.log("l'utilisateur " + username + " n'est pas dans la base de donnée.");
             bd_createNewUser(username, hashedPassword, callback)
-            console.log("l'utilisateur " + username + " a été créé !");
+            ////console.log("l'utilisateur " + username + " a été créé !");
             callback(null, { message: 'Account created successfully! You can now Sign In.' })
             return;
         }
         else {
-            console.log("Utilisateur est déjà dans la base de donnée.")
+            ////console.log("Utilisateur est déjà dans la base de donnée.")
             callback(null, { message: 'This username already exists. Please choose another username.' });
         }
     });
@@ -86,7 +86,7 @@ function bd_createNewUser(username, hashedPassword, callback) {
     const query = 'INSERT INTO users (username, password,isAdmin) VALUES (?,?,?);';
     connection.query(query, [username, hashedPassword, 0], (err, results) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -95,7 +95,7 @@ function bd_createNewUser(username, hashedPassword, callback) {
         const querybis = "INSERT INTO stats (id,goldQty,lastChestOpened,signUpDate) VALUES (?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW()) "
         connection.query(querybis, [idUser, 1000], (err, results) => {
             if (err) {
-                console.error('Error executing query:', err);
+                ////console.error('Error executing query:', err);
                 callback(err, null);
                 return;
             }
@@ -107,13 +107,13 @@ function bd_signIn(username, password, session, callback) {
     const query = 'SELECT password,id FROM users WHERE username = ?'
     connection.query(query, [username], async (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        console.log(result);
-        console.log(result.length);
-        console.log(result.length === 0);
+        ////console.log(result);
+        ////console.log(result.length);
+        ////console.log(result.length === 0);
 
         if (result.length === 0) {
             callback(null, { message: 'Invalid username or password' })
@@ -136,7 +136,7 @@ function bd_openChest(id, callback) {
     const query = 'SELECT lastChestOpened from stats WHERE id = ?'
     connection.query(query, [id], async (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -153,7 +153,7 @@ function bd_openChest(id, callback) {
             const query = 'UPDATE stats SET goldQty = goldQty + 10, lastChestOpened = ? WHERE id = ?';
             connection.query(query, [oneMinuteLater, id], async (err, result) => {
                 if (err) {
-                    console.error('Error executing query:', err);
+                    ////console.error('Error executing query:', err);
                     callback(err, null);
                     return;
                 }
@@ -180,7 +180,7 @@ async function bd_buyNormalDeck(id, callback) {
             giveUserItem(item.id, id, callback);
         }
     } else {
-        callback("User can't afford this deck")
+        callback(null,{message:"User can't afford this deck"})
     }
 }
 
@@ -189,7 +189,7 @@ function heCanPay(id) {
         const query = 'SELECT goldQty FROM stats WHERE id = ?';
         connection.query(query, [id], (err, result) => {
             if (err) {
-                console.error('Error executing query:', err);
+                //console.error('Error executing query:', err);
                 reject(err);
             } else {
                 if (result.length === 0) {
@@ -200,7 +200,7 @@ function heCanPay(id) {
                     resolve(true)
                 }
                 else {
-                    console.log("User can't afford this deck ");
+                    //console.log("User can't afford this deck ");
                     resolve(false);
                 }
             }
@@ -211,11 +211,11 @@ function userPayingGold(id, goldQty) {
     const query = 'UPDATE stats SET goldQty = goldQty - ? WHERE id = ?';
     connection.query(query, [goldQty, id], async (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            //console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        console.log('Stats updated user paid');
+        //console.log('Stats updated user paid');
     });
 }
 
@@ -225,7 +225,7 @@ function chooseRandomItem() {
         const query = 'SELECT * from items WHERE rarity = ?'
         connection.query(query, [rarity], async (err, result) => {
             if (err) {
-                console.error('Error executing query:', err);
+                ////console.error('Error executing query:', err);
                 reject(err)
                 return;
             }
@@ -246,14 +246,14 @@ function doesUserAlreadyHaveThisItem(idItem, idUser) {
         const query = 'SELECT * FROM collection WHERE id_user = ? AND id_item = ?';
         connection.query(query, [idUser, idItem], (err, result) => {
             if (err) {
-                console.error('Error executing query:', err);
+                ////console.error('Error executing query:', err);
                 reject(err);
             } else {
                 if (result.length === 0) {
-                    console.log("User doesn't have this item");
+                    ////console.log("User doesn't have this item");
                     resolve(false);
                 } else {
-                    console.log("User already has this item");
+                    ////console.log("User already has this item");
                     resolve(true);
                 }
             }
@@ -272,11 +272,11 @@ function giveUserSomeGold(rarity, id, callback) {
     const query = 'UPDATE stats SET goldQty = goldQty + ? WHERE id = ?';
     connection.query(query, [worthRarityInGold[rarity], id], async (err, result) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        callback(null, 'Stats updated +gold already item');
+        callback(null, {message:'Stats updated +gold already item'});
     });
 }
 
@@ -285,11 +285,11 @@ function giveUserItem(idItem, idUser, callback) {
 
     connection.query(query, [idItem, idUser], (err, results) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        callback(null, "item is add to user's collection");
+        callback(null, {message:"item is add to user's collection"});
     });
 }
 
@@ -306,7 +306,7 @@ function selectRarity() {
         rd = Math.floor(Math.random() * sumArray(rarityWeights))
     }
     let index = 0
-    while (rd > 0) {
+    while (rd >= 0) {
         rd -= rarityWeights[index]
         index++
     }
@@ -317,12 +317,12 @@ function sumArray(array) {
 }
 
 function bd_getUserStats(idUser, callback) {
-    console.log("stats of user with id : " + idUser)
+    ////console.log("stats of user with id : " + idUser)
     const query = 'SELECT goldQty,signUpDate,lastChestOpened FROM stats WHERE id = ?';
 
     connection.query(query, [idUser], (err, results) => {
         if (err) {
-            console.error('Error executing query:', err);
+            ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
