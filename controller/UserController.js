@@ -37,12 +37,17 @@ function getUserStats(id,req,res){
     userQueries.bd_getUserStats(id,req,res)
 }
 
+function deleteAccount(id,req,res){
+    userQueries.bd_deleteAccount(id,req,res)
+}
+
 module.exports = {
     getAllUsers: getAllUsers,
     addUser:addUser,
     deleteUser:deleteUser,
     updateUser:updateUser,
     signUp:signUp,
+    deleteAccount:deleteAccount,
     signIn:signIn,
     openChest:openChest,
     buyNormalDeck:buyNormalDeck,

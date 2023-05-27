@@ -1,0 +1,58 @@
+@startuml
+class connexionBD {
+    +connexion()
+}
+
+class itemQueries {
+    +bd_getAllItems()
+    +bd_getAllItemsForUser(idUser)
+}
+
+class userQueries {
+    +bd_getAllUsers()
+    +bd_signUp(username,password)
+    +bd_createNewUser(username,password)
+    +bd_deleteAccount(idUser)
+    +bd_signIn(username,password,session)
+    +bd_openChest(idUser)
+    +bd_buyNormalDeck(idUser)
+    +bd_getUserStats(idUser)
+}
+
+class itemController {
+    +getAllItems()
+    +getAllItemsForUser(idUser)
+}
+
+class userController {
+    +getAllUsers()
+    +getUserStats(idUser)
+    +signUp(username,password)
+    +createNewUser(username,password)
+    +deleteAccount(idUser)
+    +signIn(username,password,session)
+    +openChest(idUser)
+    +buyNormalDeck(idUser)
+    
+}
+
+class index{
++get('/items')
++get('/itemsOfUser')
++get('/users')
++get('/stats')
++post('/signUp')
++post('/signIn')
++patch('/openChest')
++patch('/buyNormalDeck')
+
+}
+index --> itemController
+index --> userController
+
+itemController --> itemQueries
+userController --> userQueries
+
+itemQueries --> connexionBD
+userQueries --> connexionBD
+@enduml

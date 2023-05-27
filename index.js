@@ -159,6 +159,18 @@ app.patch('/updateUser/:idUser',(req,res) => {
     });
 })
 
+app.patch('/deleteAccount/:idUser',(req,res) => {
+    const idUser = req.params.idUser;
+    UserController.deleteAccount(idUser,(err,User) => {
+        if (err) {
+            //console.error('Error fetching Users:', err);
+            res.status(500).send('Error deleting Users from database.');
+            return;
+        }
+        res.send(User);
+    });
+})
+
 app.get('/stats/:token',(req, res) => {
     const token = req.params.token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);

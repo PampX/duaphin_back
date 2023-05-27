@@ -1,0 +1,62 @@
+@startuml
+actor User
+
+User -> Frontend : Clicks on "Buy a deck" button"
+Frontend -> Backend : Sends request to buyNormalDeck route
+activate Backend
+Backend -> UserController : Calls buyNormalDeck function
+activate UserController
+UserController -> UserQueries : Calls bd_buyNormalDeck function
+activate UserQueries
+
+UserQueries -> UserQueries : Calls canUserPay function
+activate UserQueries
+UserQueries -> Database : SELECT user gold
+Database --> UserQueries : Returns user gold
+UserQueries --> UserQueries : Returns bool
+deactivate UserQueries
+alt User can pay
+
+UserQueries -> UserQueries : Calls chooseRandomItem function
+activate UserQueries
+UserQueries -> UserQueries : Calls selectRarity functions
+activate UserQueries
+UserQueries --> UserQueries : Return Rarity
+deactivate UserQueries
+UserQueries -> Database : SELECT * items with Rarity
+Database --> UserQueries : Returns * items with Rarity
+UserQueries --> UserQueries : Returns random item
+deactivate UserQueries
+
+UserQueries -> UserQueries : Calls doesUserAlreadyHaveThisItem function
+activate UserQueries
+UserQueries -> Database : SELECT * items of user
+Database --> UserQueries : Returns * items of user
+UserQueries --> UserQueries : Returns bool
+deactivate UserQueries
+
+alt User don't have this item
+
+UserQueries -> UserQueries : Calls giveUserItem function
+activate UserQueries
+UserQueries -> Database : UPDATE user collection
+deactivate UserQueries
+
+else 
+
+UserQueries -> UserQueries : Calls giveUserSomeGold function
+activate UserQueries
+UserQueries -> Database : UPDATE user gold
+deactivate UserQueries
+
+end
+end
+
+UserQueries --> UserController : Returns result
+deactivate UserQueries
+UserController --> Backend : Returns result
+deactivate UserController
+Backend --> Frontend : Returns result
+deactivate Backend
+Frontend -> User : Displays result to user
+@enduml

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { connection } = require('./connexionDB.js');
 
 function bd_getAllUsers(callback) {
-    const query = 'SELECT id,username,stats FROM users';
+    const query = 'SELECT id,username FROM users';
 
     connection.query(query, (err, results) => {
         if (err) {
@@ -69,9 +69,9 @@ function bd_signUp(username, hashedPassword, callback) {
         }
         if (result.length === 0) {
             ////console.log("l'utilisateur " + username + " n'est pas dans la base de donnée.");
-            bd_createNewUser(username, hashedPassword, callback)
+            const id = bd_createNewUser(username, hashedPassword, callback)
             ////console.log("l'utilisateur " + username + " a été créé !");
-            callback(null, { message: 'Account created successfully! You can now Sign In.' })
+            callback(null, { message: 'Account created successfully! You can now Sign In.', id: id })
             return;
         }
         else {
@@ -86,7 +86,7 @@ function bd_createNewUser(username, hashedPassword, callback) {
     const query = 'INSERT INTO users (username, password,isAdmin) VALUES (?,?,?);';
     connection.query(query, [username, hashedPassword, 0], (err, results) => {
         if (err) {
-            ////console.error('Error executing query:', err);
+            console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
@@ -95,12 +95,40 @@ function bd_createNewUser(username, hashedPassword, callback) {
         const querybis = "INSERT INTO stats (id,goldQty,lastChestOpened,signUpDate) VALUES (?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW()) "
         connection.query(querybis, [idUser, 1000], (err, results) => {
             if (err) {
-                ////console.error('Error executing query:', err);
+                console.error('Error executing query:', err);
                 callback(err, null);
                 return;
             }
+            return idUser;
         })
     });
+}
+
+function bd_deleteAccount(id, callback) {
+    const query_stats = "DELETE FROM stats WHERE id = ?";
+    connection.query(query_stats, [id], (err, results_stats) => {
+        if (err) {
+            callback(err, null);
+            return;
+        }
+        if (results_stats.affectedRows === 0) {
+            callback(err, {message:"user doesn't exist in stats"});
+            return;
+        }
+        const query_users = "DELETE FROM users WHERE id = ?";
+        connection.query(query_users, [id], (err, results_users) => {
+        if (err) {
+            callback(err, null);
+            return;
+        }
+        if (results_users.affectedRows === 0) {
+            callback(err, {message:"user doesn't exist in users"});
+            return;
+        }
+        callback(null, {message: "account of user "+id+" has been delete"});
+    });
+    });
+    
 }
 
 function bd_signIn(username, password, session, callback) {
@@ -168,7 +196,7 @@ function bd_openChest(id, callback) {
 }
 
 async function bd_buyNormalDeck(id, callback) {
-    let doesHeCan = await heCanPay(id)
+    let doesHeCan = await canUserPay(id)
     if (doesHeCan) {
         let item = await chooseRandomItem();
         let heHasIt = await doesUserAlreadyHaveThisItem(item.id, id);
@@ -184,7 +212,7 @@ async function bd_buyNormalDeck(id, callback) {
     }
 }
 
-function heCanPay(id) {
+function canUserPay(id) {
     return new Promise((resolve, reject) => {
         const query = 'SELECT goldQty FROM stats WHERE id = ?';
         connection.query(query, [id], (err, result) => {
@@ -337,6 +365,7 @@ module.exports = {
     bd_deleteUser: bd_deleteUser,
     bd_updateUser: bd_updateUser,
     bd_signUp: bd_signUp,
+    bd_deleteAccount:bd_deleteAccount,
     bd_signIn: bd_signIn,
     bd_openChest: bd_openChest,
     bd_buyNormalDeck: bd_buyNormalDeck,
