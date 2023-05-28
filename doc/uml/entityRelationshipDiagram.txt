@@ -1,0 +1,40 @@
+@startuml
+entity users {
+  * id : int
+  --
+  * username : string
+  * password : string
+  * isAdmin : bool
+}
+
+entity stats {
+  * id : int
+  --
+  * goldQty : int
+  * lastChestOpened : date
+  * signUpDate : date
+}
+
+entity item {
+  * id : int
+  --
+  * name : string
+  * description : string
+  * rarity : rarity
+  * path : string
+}
+
+entity rarity {
+  * value : string
+}
+
+entity collection {
+  * id_User : int
+  * id_Item : int
+}
+
+item -- "1" rarity : has
+collection "*" -- "*" item : contains
+users "1" -- "1" collection : owns
+users "1" -- "1" stats : has
+@enduml
