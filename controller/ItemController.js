@@ -1,4 +1,3 @@
-const Item = require('../model/Item.js')
 const itemQueries = require('../database/mysql/itemQueries.js');
 
 

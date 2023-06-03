@@ -1,4 +1,3 @@
-const User = require('../model/User.js')
 const userQueries = require('../database/mysql/userQueries.js')
 
 

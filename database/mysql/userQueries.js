@@ -223,7 +223,7 @@ function canUserPay(id) {
                 if (result.length === 0) {
                     reject("There is a probleme about gold qty");
 
-                } else if (result[0].goldQty > 100) {
+                } else if (result[0].goldQty >= 100) {
                     userPayingGold(id, 100)
                     resolve(true)
                 }
@@ -329,10 +329,9 @@ function selectRarity() {
     // const rarityWeightsluxe = [0,0,50,30,20]
 
     let rd = 0
-    // sécurité pour éviter des choses étranges
-    while (rd === 0) {
-        rd = Math.floor(Math.random() * sumArray(rarityWeights))
-    }
+    // sumArray just make sum of an Array
+    rd = Math.floor(Math.random() * sumArray(rarityWeights))
+    
     let index = 0
     while (rd >= 0) {
         rd -= rarityWeights[index]
