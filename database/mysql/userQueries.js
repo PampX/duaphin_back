@@ -82,39 +82,18 @@ function bd_signUp(username, hashedPassword, callback) {
 }
 
 function bd_createNewUser(username, hashedPassword, callback) {
-    // NEW USERS WITH STATS
-    const query = 'INSERT INTO users (username, password,isAdmin) VALUES (?,?,?);';
-    connection.query(query, [username, hashedPassword, 0], (err, results) => {
+    // NEW USERS
+    const query = 'INSERT INTO users (username, password,isAdmin,goldQty,lastChestOpened,signUpDate) VALUES (?,?,?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW());';
+    connection.query(query, [username, hashedPassword, 0,1000], (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        const idUser = results.insertId;
-        // NEW STATS 
-        const querybis = "INSERT INTO stats (id,goldQty,lastChestOpened,signUpDate) VALUES (?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW()) "
-        connection.query(querybis, [idUser, 1000], (err, results) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                callback(err, null);
-                return;
-            }
-            return idUser;
-        })
     });
 }
 
 function bd_deleteAccount(id, callback) {
-    const query_stats = "DELETE FROM stats WHERE id = ?";
-    connection.query(query_stats, [id], (err, results_stats) => {
-        if (err) {
-            callback(err, null);
-            return;
-        }
-        if (results_stats.affectedRows === 0) {
-            callback(err, {message:"user doesn't exist in stats"});
-            return;
-        }
         const query_users = "DELETE FROM users WHERE id = ?";
         connection.query(query_users, [id], (err, results_users) => {
         if (err) {
@@ -126,7 +105,6 @@ function bd_deleteAccount(id, callback) {
             return;
         }
         callback(null, {message: "account of user "+id+" has been delete"});
-    });
     });
     
 }
@@ -161,7 +139,7 @@ function bd_signIn(username, password, session, callback) {
 }
 
 function bd_openChest(id, callback) {
-    const query = 'SELECT lastChestOpened from stats WHERE id = ?'
+    const query = 'SELECT lastChestOpened from users WHERE id = ?'
     connection.query(query, [id], async (err, result) => {
         if (err) {
             ////console.error('Error executing query:', err);
@@ -169,7 +147,7 @@ function bd_openChest(id, callback) {
             return;
         }
         if (result.length === 0) {
-            callback(null, { message: 'Stats not found' });
+            callback(null, { message: 'User not found' });
             return;
         }
         // Vérifier si la date est supérieure à now + 1 minute
@@ -178,19 +156,19 @@ function bd_openChest(id, callback) {
             const now = new Date();
             const oneMinuteLater = new Date(now.getTime() + 60000); // Ajouter 1 minute
 
-            const query = 'UPDATE stats SET goldQty = goldQty + 10, lastChestOpened = ? WHERE id = ?';
+            const query = 'UPDATE users SET goldQty = goldQty + 10, lastChestOpened = ? WHERE id = ?';
             connection.query(query, [oneMinuteLater, id], async (err, result) => {
                 if (err) {
                     ////console.error('Error executing query:', err);
                     callback(err, null);
                     return;
                 }
-                callback(null, { message: 'Stats updated' });
+                callback(null, { message: 'User updated' });
             });
         }
         else {
             // La date est inférieure ou égale à now + 1 minute, ne rien faire
-            callback(null, { message: 'Stats not updated,you have to wait.'});
+            callback(null, { message: 'User not updated,you have to wait.'});
         }
     })
 }
@@ -214,7 +192,7 @@ async function bd_buyNormalDeck(id, callback) {
 
 function canUserPay(id) {
     return new Promise((resolve, reject) => {
-        const query = 'SELECT goldQty FROM stats WHERE id = ?';
+        const query = 'SELECT goldQty FROM users WHERE id = ?';
         connection.query(query, [id], (err, result) => {
             if (err) {
                 //console.error('Error executing query:', err);
@@ -236,14 +214,14 @@ function canUserPay(id) {
     });
 }
 function userPayingGold(id, goldQty) {
-    const query = 'UPDATE stats SET goldQty = goldQty - ? WHERE id = ?';
+    const query = 'UPDATE users SET goldQty = goldQty - ? WHERE id = ?';
     connection.query(query, [goldQty, id], async (err, result) => {
         if (err) {
             //console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        //console.log('Stats updated user paid');
+        //console.log('User updated user paid');
     });
 }
 
@@ -297,14 +275,14 @@ function giveUserSomeGold(rarity, id, callback) {
         epic: 30,
         legendary: 50,
     }
-    const query = 'UPDATE stats SET goldQty = goldQty + ? WHERE id = ?';
+    const query = 'UPDATE users SET goldQty = goldQty + ? WHERE id = ?';
     connection.query(query, [worthRarityInGold[rarity], id], async (err, result) => {
         if (err) {
             ////console.error('Error executing query:', err);
             callback(err, null);
             return;
         }
-        callback(null, {message:'Stats updated +gold already item'});
+        callback(null, {message:'Users updated +gold already item'});
     });
 }
 
@@ -344,8 +322,7 @@ function sumArray(array) {
 }
 
 function bd_getUserStats(idUser, callback) {
-    ////console.log("stats of user with id : " + idUser)
-    const query = 'SELECT goldQty,signUpDate,lastChestOpened FROM stats WHERE id = ?';
+    const query = 'SELECT goldQty,signUpDate,lastChestOpened FROM users WHERE id = ?';
 
     connection.query(query, [idUser], (err, results) => {
         if (err) {

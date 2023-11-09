@@ -13,6 +13,7 @@ dotenv.config()
 const cors = require('cors')
 app.use(cors({ origin: 'http://localhost:3000' }));
 
+//console.log("http://localhost:3000");
 // middleware pour extraire les donnée JSON
 app.use(bodyParser.json())
 
@@ -171,8 +172,9 @@ app.patch('/deleteAccount/:idUser',(req,res) => {
     });
 })
 
-app.get('/stats/:token',(req, res) => {
-    const token = req.params.token
+app.get('/stats',(req, res) => {
+    const token = req.headers.token;
+    //console.log(token);
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     //console.log(decoded);
     const id = decoded.userId;
@@ -214,14 +216,14 @@ app.post('/signIn', async(req,res) =>{
 })
 
 app.patch('/openChest', (req,res)=>{
-    const token = req.body.token
+    const token = req.headers.token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     //console.log(decoded);
     const id = decoded.userId
     
     UserController.openChest(id,(err,User) => {
         if (err) {
-            //console.error('Error openChest :', err);
+            console.error('Error openChest :', err);
             res.status(500).send('Error openChest User.');
             return;
         }
@@ -247,5 +249,5 @@ app.patch('/buyNormalDeck', (req,res)=>{
 })
 
 app.listen(8080, () => {
-    //console.log("Server started on port 8080");
+    console.log("Server started on port 8080");
 })
