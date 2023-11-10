@@ -83,7 +83,8 @@ function bd_signUp(username, hashedPassword, callback) {
 
 function bd_createNewUser(username, hashedPassword, callback) {
     // NEW USERS
-    const query = 'INSERT INTO users (username, password,isAdmin,goldQty,lastChestOpened,signUpDate) VALUES (?,?,?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW());';
+    const query = `INSERT INTO users (username, password,isAdmin,goldQty,lastChestOpened,signUpDate) 
+                    VALUES (?,?,?,?,DATE_SUB(NOW(), INTERVAL 24 HOUR),NOW());`;
     connection.query(query, [username, hashedPassword, 0,1000], (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
